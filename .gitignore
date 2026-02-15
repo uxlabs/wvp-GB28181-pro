@@ -31,3 +31,4 @@ certificates
 /.vs
 /docker/volumes
 /docker/wvp/config/jwk.json
+.DS_Store
