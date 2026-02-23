@@ -15,19 +15,19 @@ import java.util.List;
 import java.util.Map;
 
 public interface IMediaNodeServerService {
-    int createRTPServer(MediaServer mediaServer, String streamId, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode);
+    int createRTPServer(MediaServer mediaServer, String app, String stream, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode);
 
-    void closeRtpServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback);
+    void closeRtpServer(MediaServer mediaServer, String app, String stream, CommonCallback<Boolean> callback);
 
 
-    int createJTTServer(MediaServer mediaServer, String streamId, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode);
-
-    void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback);
+//    int createJTTServer(MediaServer mediaServer, String streamId, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode);
+//
+//    void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback);
 
 
     void closeStreams(MediaServer mediaServer, String app, String stream);
 
-    Boolean updateRtpServerSSRC(MediaServer mediaServer, String stream, String ssrc);
+    Boolean updateRtpServerSSRC(MediaServer mediaServer, String app, String stream, String ssrc);
 
     boolean checkNodeId(MediaServer mediaServer);
 
@@ -43,7 +43,7 @@ public interface IMediaNodeServerService {
 
     List<StreamInfo> getMediaList(MediaServer mediaServer, String app, String stream, String callId);
 
-    Boolean connectRtpServer(MediaServer mediaServer, String address, int port, String stream);
+    Boolean connectRtpServer(MediaServer mediaServer, String address, int port, String app, String stream);
 
     void getSnap(MediaServer mediaServer, String app, String stream, int timeoutSec, int expireSec, String path, String fileName);
 

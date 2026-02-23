@@ -5,6 +5,7 @@ import com.genersoft.iot.vmp.common.CommonCallback;
 import com.genersoft.iot.vmp.common.InviteInfo;
 import com.genersoft.iot.vmp.common.InviteSessionType;
 import com.genersoft.iot.vmp.common.StreamInfo;
+import com.genersoft.iot.vmp.common.enums.MediaApp;
 import com.genersoft.iot.vmp.conf.SipConfig;
 import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
@@ -68,40 +69,40 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
     }
 
     @Override
-    public int createRTPServer(MediaServer mediaServer, String stream, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode) {
+    public int createRTPServer(MediaServer mediaServer, String app, String stream, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode) {
         Boolean recordSip = userSetting.getRecordSip();
-        return ablresTfulUtils.openRtpServer(mediaServer, "rtp", stream, 96, port, tcpMode, disableAudio?1:0, recordSip, false);
+        return ablresTfulUtils.openRtpServer(mediaServer, app, stream, 96, port, tcpMode, disableAudio?1:0, recordSip, false);
     }
 
     @Override
-    public void closeRtpServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
+    public void closeRtpServer(MediaServer mediaServer, String app, String stream, CommonCallback<Boolean> callback) {
        if (mediaServer == null) {
            return;
        }
-        ABLResult result = ablresTfulUtils.closeStreams(mediaServer, "rtp", streamId);
+        ABLResult result = ablresTfulUtils.closeStreams(mediaServer, app, stream);
         logger.info("关闭RTP Server " +  result);
         if (result.getCode() != 0) {
             logger.error("[closeRtpServer] 失败: {}", result.getMemo());
         }
     }
 
-    @Override
-    public int createJTTServer(MediaServer mediaServer, String stream, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode) {
-        Boolean recordSip = userSetting.getRecordSip();
-        return ablresTfulUtils.openRtpServer(mediaServer, "1078", stream, 96, port, tcpMode, disableAudio?1:0, recordSip, true);
-    }
-
-    @Override
-    public void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
-        if (mediaServer == null) {
-            return;
-        }
-        ABLResult result = ablresTfulUtils.closeStreams(mediaServer, "1078", streamId);
-        logger.info("关闭JT-RTP Server " +  result);
-        if (result.getCode() != 0) {
-            logger.error("[JT-closeRtpServer] 失败: {}", result.getMemo());
-        }
-    }
+//    @Override
+//    public int createJTTServer(MediaServer mediaServer, String stream, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode) {
+//        Boolean recordSip = userSetting.getRecordSip();
+//        return ablresTfulUtils.openRtpServer(mediaServer, MediaApp.JT1078, stream, 96, port, tcpMode, disableAudio?1:0, recordSip, true);
+//    }
+//
+//    @Override
+//    public void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
+//        if (mediaServer == null) {
+//            return;
+//        }
+//        ABLResult result = ablresTfulUtils.closeStreams(mediaServer, MediaApp.JT1078, streamId);
+//        logger.info("关闭JT-RTP Server " +  result);
+//        if (result.getCode() != 0) {
+//            logger.error("[JT-closeRtpServer] 失败: {}", result.getMemo());
+//        }
+//    }
 
     @Override
     public void closeStreams(MediaServer mediaServer, String app, String streamId) {
@@ -112,7 +113,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
     }
 
     @Override
-    public Boolean updateRtpServerSSRC(MediaServer mediaServerItem, String streamId, String ssrc) {
+    public Boolean updateRtpServerSSRC(MediaServer mediaServerItem, String app, String streamId, String ssrc) {
         return null;
     }
 
@@ -246,7 +247,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
 
         streamInfoResult.setMediaInfo(mediaInfo);
 
-        if (!"broadcast".equalsIgnoreCase(app) && !ObjectUtils.isEmpty(mediaServer.getTranscodeSuffix()) && !"null".equalsIgnoreCase(mediaServer.getTranscodeSuffix())) {
+        if (!MediaApp.GB28181_BROADCAST.equalsIgnoreCase(app) && !ObjectUtils.isEmpty(mediaServer.getTranscodeSuffix()) && !"null".equalsIgnoreCase(mediaServer.getTranscodeSuffix())) {
             String newStream = stream + "_" + mediaServer.getTranscodeSuffix();
             mediaServer.setTranscodeSuffix(null);
             StreamInfo transcodeStreamInfo = getStreamInfoByAppAndStream(mediaServer, app, newStream, null, addr, callId, isPlay);
@@ -256,7 +257,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
     }
 
     @Override
-    public Boolean connectRtpServer(MediaServer mediaServerItem, String address, int port, String stream) {
+    public Boolean connectRtpServer(MediaServer mediaServerItem, String address, int port, String app, String stream) {
         logger.warn("[abl-connectRtpServer] 未实现");
         return null;
     }
@@ -443,7 +444,7 @@ public class ABLMediaNodeServerService implements IMediaNodeServerService {
 
     @Override
     public List<String> listRtpServer(MediaServer mediaServer) {
-        ABLResult ablResult = ablresTfulUtils.getMediaList(mediaServer, "rtp", null);
+        ABLResult ablResult = ablresTfulUtils.getMediaList(mediaServer, null, null);
         if (ablResult.getCode() != 0) {
             return null;
         }

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.common.CommonCallback;
 import com.genersoft.iot.vmp.common.StreamInfo;
+import com.genersoft.iot.vmp.common.enums.MediaApp;
 import com.genersoft.iot.vmp.conf.UserSetting;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.gb28181.bean.SendRtpInfo;
@@ -47,24 +48,24 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     private HookSubscribe subscribe;
 
     @Override
-    public int createRTPServer(MediaServer mediaServer, String streamId, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode) {
-        return zlmServerFactory.createRTPServer(mediaServer, "rtp", streamId, ssrc, port, onlyAuto, disableAudio, reUsePort, tcpMode);
+    public int createRTPServer(MediaServer mediaServer, String app, String stream, long ssrc, Integer port, Boolean onlyAuto, Boolean disableAudio, Boolean reUsePort, Integer tcpMode) {
+        return zlmServerFactory.createRTPServer(mediaServer, app, stream, ssrc, port, onlyAuto, disableAudio, reUsePort, tcpMode);
     }
 
     @Override
-    public void closeRtpServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
-        zlmServerFactory.closeRtpServer(mediaServer, streamId, callback);
+    public void closeRtpServer(MediaServer mediaServer, String app, String stream, CommonCallback<Boolean> callback) {
+        zlmServerFactory.closeRtpServer(mediaServer, app, stream, callback);
     }
 
-    @Override
-    public int createJTTServer(MediaServer mediaServer, String streamId, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode) {
-        return zlmServerFactory.createRTPServer(mediaServer, "1078", streamId, 0, port, disableVideo, disableAudio, false, tcpMode);
-    }
+//    @Override
+//    public int createJTTServer(MediaServer mediaServer, String streamId, Integer port, Boolean disableVideo, Boolean disableAudio, Integer tcpMode) {
+//        return zlmServerFactory.createRTPServer(mediaServer, "1078", streamId, 0, port, disableVideo, disableAudio, false, tcpMode);
+//    }
 
-    @Override
-    public void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
-        zlmServerFactory.closeRtpServer(mediaServer, streamId, callback);
-    }
+//    @Override
+//    public void closeJTTServer(MediaServer mediaServer, String streamId, CommonCallback<Boolean> callback) {
+//        zlmServerFactory.closeRtpServer(mediaServer, streamId, callback);
+//    }
 
     @Override
     public void closeStreams(MediaServer mediaServer, String app, String stream) {
@@ -72,8 +73,8 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     }
 
     @Override
-    public Boolean updateRtpServerSSRC(MediaServer mediaServer, String streamId, String ssrc) {
-        return zlmServerFactory.updateRtpServerSSRC(mediaServer, streamId, ssrc);
+    public Boolean updateRtpServerSSRC(MediaServer mediaServer, String app, String streamId, String ssrc) {
+        return zlmServerFactory.updateRtpServerSSRC(mediaServer, app, streamId, ssrc);
     }
 
     @Override
@@ -208,8 +209,8 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
     }
 
     @Override
-    public Boolean connectRtpServer(MediaServer mediaServer, String address, int port, String stream) {
-        ZLMResult<?> zlmResult = zlmresTfulUtils.connectRtpServer(mediaServer, address, port, stream);
+    public Boolean connectRtpServer(MediaServer mediaServer, String address, int port, String app, String stream) {
+        ZLMResult<?> zlmResult = zlmresTfulUtils.connectRtpServer(mediaServer, address, port, app, stream);
         log.info("[TCP主动连接对方] 结果： {}", zlmResult);
         return zlmResult.getCode() == 0;
     }
@@ -679,7 +680,7 @@ public class ZLMMediaNodeServerService implements IMediaNodeServerService {
 
         streamInfoResult.setMediaInfo(mediaInfo);
 
-        if (!"broadcast".equalsIgnoreCase(app) && !ObjectUtils.isEmpty(mediaServer.getTranscodeSuffix()) && !"null".equalsIgnoreCase(mediaServer.getTranscodeSuffix())) {
+        if (!MediaApp.GB28181_BROADCAST.equalsIgnoreCase(app) && !ObjectUtils.isEmpty(mediaServer.getTranscodeSuffix()) && !"null".equalsIgnoreCase(mediaServer.getTranscodeSuffix())) {
             String newStream = stream + "_" + mediaServer.getTranscodeSuffix();
             mediaServer.setTranscodeSuffix(null);
             StreamInfo transcodeStreamInfo = getStreamInfoByAppAndStream(mediaServer, app, newStream, null, addr, callId, isPlay);
